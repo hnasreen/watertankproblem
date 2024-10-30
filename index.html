@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Tank Problem</title>
+    <style>
+        #waterTable {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #waterTable th, #waterTable td {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .block {
+            background-color: yellow;
+        }
+        .water {
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Water Tank Problem</h1>
+        <input type="text" id="inputArr" placeholder="e.g. 0,4,0,0,0,6,0,6,4,0">
+        <button onclick="fetchArr()">Compute Water</button>
+    </div>
+    <h3 id="waterunit"></h3>
+    <div id="waterTableContainer"></div>
+
+    <script>
+        function fetchArr() {
+            let inputElement = document.getElementById('inputArr');
+            let inputArr = inputElement.value.split(',').map(Number); 
+            let maxHeight = Math.max(...inputArr); 
+            let waterLevels = calculateWaterLevels(inputArr);
+            displayWaterTable(inputArr, waterLevels, maxHeight);
+            document.getElementById('waterunit').innerText = `Total ${countWaterUnits(waterLevels)} Water Units`;
+        }
+
+        function calculateWaterLevels(bricks) {
+            let firstCase = [];
+            let secondCase = [];
+            let finalCase = [];
+            let lastValueForFirstCase = 0;
+            let lastValueForSecondCase = 0;
+
+            for (let i = 0; i < bricks.length; i++) {
+                let element = bricks[i];
+                if (element === 0) {
+                    firstCase.push(lastValueForFirstCase);
+                } else {
+                    firstCase.push('-');
+                    lastValueForFirstCase = element;
+                }
+            }
+
+            for (let i = bricks.length - 1; i >= 0; i--) {
+                let element = bricks[i];
+                if (element === 0) {
+                    secondCase[i] = lastValueForSecondCase;
+                } else {
+                    secondCase[i] = '-';
+                    lastValueForSecondCase = element;
+                }
+            }
+
+            for (let i = 0; i < bricks.length; i++) {
+                let fc = firstCase[i];
+                let sc = secondCase[i];
+                if (fc === '-') {
+                    finalCase[i] = 0;
+                } else {
+                    finalCase[i] = Math.max(Math.min(fc, sc) - bricks[i], 0);
+                }
+            }
+
+            return finalCase;
+        }
+
+        function displayWaterTable(bricks, waterLevels, maxHeight) {
+            const container = document.getElementById('waterTableContainer');
+            container.innerHTML = ''; // Clear previous content
+
+            // Create the table element
+            let table = document.createElement('table');
+            table.id = 'waterTable';
+
+            // Generate rows for visualizing water and blocks
+            for (let row = maxHeight; row >= 1; row--) {
+                let tr = document.createElement('tr');
+                for (let col = 0; col < bricks.length; col++) {
+                    let td = document.createElement('td');
+
+                    // Add block color for bricks, water color for water levels, or empty cell
+                    if (bricks[col] >= row) {
+                        td.className = 'block';
+                    } else if (bricks[col] + waterLevels[col] >= row) {
+                        td.className = 'water';
+                    }
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+            container.appendChild(table);
+        }
+
+        function countWaterUnits(waterLevels) {
+            return waterLevels.reduce((sum, level) => sum + level, 0);
+        }
+    </script>
+</body>
+</html>
